@@ -1,0 +1,15 @@
+{
+    // https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "emulicious-debugger",
+            "request": "launch",
+            "name": "Launch in Emulicious",
+            "program": "${workspaceFolder}/out/template.rom",
+            "port": 58870,
+            "stopOnEntry": false,
+            "preLaunchTask": "build"
+        }
+    ]
+}

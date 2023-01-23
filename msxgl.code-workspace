@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"name": "1.myprog",
+			"path": "apps/myprog"
+		},
+		{
+			"name": "2.myv9990",
+			"path": "apps/myv9990"
+		},
+		{
+			"name": "3.mydbg",
+			"path": "apps/mydbg"
+		},
+		{
+			"name": "msxgl",
+			"path": "."
+		},
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"titleBar.activeBackground": "#9fb7d9"
+		}
+	},
+}
