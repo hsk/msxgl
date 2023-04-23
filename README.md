@@ -371,3 +371,37 @@ msxgl.code-workspace
 ```
 
 と書いておいて vscode でワーウスペースを開くとプロジェクトを複数切り替えて見れるので便利です。
+
+## Mega ROM を作ろう
+
+s_vgm のサンプルはメガロムのサンプルです。
+
+msxglフォルダに戻って必要なファイルをコピーしてビルドします。
+
+```
+mkdir -p apps/myvgm/content/vgm; cd apps/myvgm
+cp ../../MSXgl/projects/samples/build* ../../MSXgl/projects/samples/s_vgm* ../../MSXgl/projects/samples/project_config.js ../../MSXgl/projects/samples/msxgl_config*.h .
+cp -rf ../../MSXgl/projects/samples/content/vgm content/.
+```
+
+build.shの対応箇所を以下のように書き換えます:
+
+```
+if type -P node; then
+	node ../../MSXgl/engine/script/js/build.js projname=s_vgm target=$1
+else
+	../../MSXgl/tools/build/Node/node ../../MSXgl/engine/script/js/build.js projname=s_vgm target=$1
+fi
+```
+
+```
+./build.sh
+```
+
+動いたら成功です。
+
+![Alt text](myvgm.gif)
+
+F12を押してv9990の出力が確認しましょう。
+
+他のサンプルプログラムも調べて１個ずつ取り出してみたり、buildの設定を変えるとより使いやすくなるでしょうし、勉強にもなるでしょう。

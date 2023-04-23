@@ -1,6 +1,10 @@
 {
 	"folders": [
 		{
+			"name": "0.msxgl",
+			"path": "."
+		},
+		{
 			"name": "1.myprog",
 			"path": "apps/myprog"
 		},
@@ -11,15 +15,9 @@
 		{
 			"name": "3.mydbg",
 			"path": "apps/mydbg"
-		},
-		{
-			"name": "msxgl",
-			"path": "."
-		},
+		}
 	],
 	"settings": {
-		"workbench.colorCustomizations": {
-			"titleBar.activeBackground": "#9fb7d9"
-		}
-	},
+		"workbench.colorCustomizations": {}
+	}
 }
