@@ -72,14 +72,14 @@
 // VDP screen modes (additionnal limitations come from the selected MSX_VERSION)
 #define VDP_USE_MODE_T1				TRUE	// MSX1		Screen 0 Width 40
 #define VDP_USE_MODE_MC				TRUE	// MSX1		Screen 3
-#define VDP_USE_MODE_G1				TRUE	// MSX1		Screen 1
-#define VDP_USE_MODE_G2				TRUE	// MSX1		Screen 2
-#define VDP_USE_MODE_T2				TRUE	// MSX2		Screen 0 Width 80
-#define VDP_USE_MODE_G3				TRUE	// MSX2		Screen 4
-#define VDP_USE_MODE_G4				TRUE	// MSX2		Screen 5
-#define VDP_USE_MODE_G5				TRUE	// MSX2		Screen 6
-#define VDP_USE_MODE_G6				TRUE	// MSX2		Screen 7
-#define VDP_USE_MODE_G7				TRUE	// MSX2/2+	Screen 8, 10, 11 & 12
+#define VDP_USE_MODE_G1				FALSE	// MSX1		Screen 1
+#define VDP_USE_MODE_G2				FALSE	// MSX1		Screen 2
+#define VDP_USE_MODE_T2				FALSE	// MSX2		Screen 0 Width 80
+#define VDP_USE_MODE_G3				FALSE	// MSX2		Screen 4
+#define VDP_USE_MODE_G4				FALSE	// MSX2		Screen 5
+#define VDP_USE_MODE_G5				FALSE	// MSX2		Screen 6
+#define VDP_USE_MODE_G6				FALSE	// MSX2		Screen 7
+#define VDP_USE_MODE_G7				FALSE	// MSX2/2+	Screen 8, 10, 11 & 12
 
 #define VDP_USE_VRAM16K				TRUE	// Use 16K VRAM access functions on MSX2
 #define VDP_USE_SPRITE				TRUE	// Use sprite handling functions
@@ -91,7 +91,7 @@
 #define VDP_USE_DEFAULT_PALETTE		FALSE	// Add data for default MSX 2 palette
 #define VDP_USE_MSX1_PALETTE		FALSE	// Add data for default MSX 1 palette
 #define VDP_USE_DEFAULT_SETTINGS	TRUE	// Auto-initialization of common VDP feature
-#define VDP_USE_16X16_SPRITE		TRUE	// Use 16x16 sprites mode
+#define VDP_USE_16X16_SPRITE		FALSE	// Use 16x16 sprites mode
 #define VDP_USE_RESTORE_S0			TRUE	// Do restore of status register pointer to S#0 (needed onlt for default BIOS ISR)
 
 // ISR protection while modifiying VDP registers
@@ -105,17 +105,17 @@
 // - VDP_INIT_ON .................. Force option to be enable
 // - VDP_INIT_AUTO ................ Determining the best value for the context
 // - VDP_INIT_DEFAULT ............. Keep default value
-#define VDP_INIT_50HZ				VDP_INIT_ON
+#define VDP_INIT_50HZ				VDP_INIT_OFF
 
 //-----------------------------------------------------------------------------
 // INPUT MODULE
 //-----------------------------------------------------------------------------
 
 // Input module setting
-#define INPUT_USE_JOYSTICK			TRUE	// Add functions to handle joystick using I/O port
+#define INPUT_USE_JOYSTICK			FALSE	// Add functions to handle joystick using I/O port
 #define INPUT_USE_KEYBOARD			TRUE	// Add functions to handle keyboard using I/O port
-#define INPUT_USE_MOUSE				TRUE	// Add support for Mouse handling functions
-#define INPUT_USE_DETECT			TRUE	// Add feature to detect device plugged in General purpose ports
+#define INPUT_USE_MOUSE				FALSE	// Add support for Mouse handling functions
+#define INPUT_USE_DETECT			FALSE	// Add feature to detect device plugged in General purpose ports
 #define INPUT_USE_ISR_PROTECTION	TRUE	// Disable interruptions while access PSG registers (needed if you use BIOS or access PSG in your own ISR)
 #define INPUT_JOY_UPDATE			FALSE	// Add function to update all joystick states at once
 // Key update handler
@@ -181,9 +181,9 @@
 //-----------------------------------------------------------------------------
 
 // Game state setting
-#define GAME_USE_STATE				TRUE	// Add state machine features
-#define GAME_USE_VSYNC				TRUE	// Add vertical synchronization features
-#define GAME_USE_LOOP				TRUE	// Add game main loop with call to v-synch and state
+#define GAME_USE_STATE				FALSE	// Add state machine features
+#define GAME_USE_VSYNC				FALSE	// Add vertical synchronization features
+#define GAME_USE_LOOP				FALSE	// Add game main loop with call to v-synch and state
 
 //-----------------------------------------------------------------------------
 // GAME PAWN MODULE
@@ -191,7 +191,7 @@
 
 // GamePawn setting
 #define GAMEPAWN_ID_PER_LAYER		FALSE	// Set sprite ID for each layer (otherwise set per pawn)
-#define GAMEPAWN_USE_PHYSICS		TRUE	// Add physics and collision features
+#define GAMEPAWN_USE_PHYSICS		FALSE	// Add physics and collision features
 // Pawn's bound (can be fixed for all pawn, or setable for each one)
 #define GAMEPAWN_BOUND_X			GAMEPAWN_BOUND_CUSTOM
 #define GAMEPAWN_BOUND_Y			GAMEPAWN_BOUND_CUSTOM
@@ -221,7 +221,7 @@
 // GAME MENU MODULE
 //-----------------------------------------------------------------------------
 
-#define MENU_USE_DEFAULT_CALLBACK	TRUE	// Use default input/print callback
+#define MENU_USE_DEFAULT_CALLBACK	FALSE	// Use default input/print callback
 #define MENU_SCREEN_WIDTH			32		// Screen width
 #define MENU_CLEAR					0		// Clear character
 #define MENU_POS_X					4		// Frame position X
@@ -250,22 +250,22 @@
 //-----------------------------------------------------------------------------
 
 // Support for integer to ASCII string converter functions
-#define STRING_USE_FROM_INT8		TRUE	// Signed 8-bits integer to string
-#define STRING_USE_FROM_UINT8		TRUE	// Unsigned 8-bits integer to string
-#define STRING_USE_FROM_INT16		TRUE	// Signed 16-bits integer to string
-#define STRING_USE_FROM_UINT16		TRUE	// Unsigned 16-bits integer to string
+#define STRING_USE_FROM_INT8		FALSE	// Signed 8-bits integer to string
+#define STRING_USE_FROM_UINT8		FALSE	// Unsigned 8-bits integer to string
+#define STRING_USE_FROM_INT16		FALSE	// Signed 16-bits integer to string
+#define STRING_USE_FROM_UINT16		FALSE	// Unsigned 16-bits integer to string
 
 // Support for sprintf style formating function
-#define STRING_USE_FORMAT			TRUE
-#define STRING_USE_INT32			TRUE	// Add support for 32-bits integer
+#define STRING_USE_FORMAT			FALSE
+#define STRING_USE_INT32			FALSE	// Add support for 32-bits integer
 
 //-----------------------------------------------------------------------------
 // SCROLL MODULE 
 //-----------------------------------------------------------------------------
 
 // Allow horizontal and/or vertical scrolling
-#define SCROLL_HORIZONTAL			TRUE	// Activate horizontal scrolling
-#define SCROLL_VERTICAL				TRUE	// Activate vertical scrolling
+#define SCROLL_HORIZONTAL			FALSE	// Activate horizontal scrolling
+#define SCROLL_VERTICAL				FALSE	// Activate vertical scrolling
 // Source data info
 #define SCROLL_SRC_X				64		// Start X coordinate of the source data
 #define SCROLL_SRC_Y				0		// Start Y coordinate of the source data

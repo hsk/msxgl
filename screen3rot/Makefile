@@ -2,6 +2,8 @@ all:
 	./build.sh
 rec:
 	openmsx -machine Panasonic_FS-A1GT -ext gfx9000 -ext Moonsound -diska emul/dsk/DOS1_template.dsk -command "set speed 9999;after time 13.5 \"set speed 100;record start aaa\""
+rec1:
+	openmsx -machine Sanyo_PHC-70FD -diska emul/dsk/DOS1_template.dsk -command "record start aaa"
 mp4:
 	ffmpeg -y -i ~/.openMSX/videos/aaa.avi -b 1500k -r 30  -vf "scale=960:720" -vcodec libx264 -pix_fmt yuv420p aaa.mp4
 gif:

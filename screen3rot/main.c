@@ -13,7 +13,7 @@ typedef uint16_t u16;
 typedef int16_t s16;
 typedef int32_t s32;
 typedef uint32_t u32;
-#if 1
+#if 0
 u8 	g_VBlank = 0;
 void VBlankHook() {
 	g_VBlank = 1;
@@ -207,6 +207,7 @@ void f1(s16 y1,s16 x1) {
 #endif
 extern u8 loopcnt;
 void f3(s16 y1,s16 x1) {
+    x1;y1;
     #define X1H d
     #define X1L e
     #define Y1H b
@@ -524,8 +525,8 @@ int main() {
     buf=buf1;
     for(;((u16)buf)&255;buf++){}
     for(int i=0;i<128*64;i++)dt2[i]=dt[i]<<4;
-	Bios_SetHookCallback(H_TIMI, VBlankHook);
-	WaitVBlank();
+	//Bios_SetHookCallback(H_TIMI, VBlankHook);
+	//WaitVBlank();
     VDP_SetColor(0);
     VDP_ClearVRAM();
     VDP_SetMode(VDP_MODE_SCREEN3);
