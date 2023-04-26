@@ -477,6 +477,49 @@ void run2(){
     }
 }
 
+void run5(){
+    loopcnt = 8;
+    u8 sita;
+    s16 nx,ny;
+    for(u8 s=1;s<=63;s++){
+        sita = (s+8) & 31;
+        // sitaだけ回転する
+        nx =  128/2*256 - ((COS(sita)<<3) + SIN(sita)*24)*s/2*3;
+        ny =  (64-4)/2*256 - ((-SIN(sita)<<3) + COS(sita)*24)*s/2*3;
+        // 移動分はどのくらいか
+        dx = dx2 = COS((-sita)&31)*s/2*3;
+        dy = dy2 = SIN((-sita)&31)*s/2*3;
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+8*16+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
+    }
+    for(s8 s=61;s>=1;s-=4){
+        sita = (8-1) & 31;
+        // sitaだけ回転する
+        nx =  128/2*256 - ((COS(sita)<<3) + SIN(sita)*24)*s/2*3;
+        ny =  (64-4)/2*256 - ((-SIN(sita)<<3) + COS(sita)*24)*s/2*3;
+        // 移動分はどのくらいか
+        dx = dx2 = COS((-sita)&31)*s/2*3;
+        dy = dy2 = SIN((-sita)&31)*s/2*3;
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+8*16+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
+    }
+    for(u16 i=0;i<64*48/2;i++) {buf[i]=0x11;}
+    WriteVRAM(buf,0x800+32*8*0,32*8*3);
+    for(u16 i=0;i<64*48/2;i++) {buf[i]=0x00;}
+    WriteVRAM(buf,0x800+32*8*3,32*8*3);
+    loopcnt = 32;
+}
+
 int main() {
     buf=buf1;
     for(;((u16)buf)&255;buf++){}
@@ -492,11 +535,6 @@ int main() {
     VDP_RegWriteBak(4,1); VDP_RegWriteBak(2,0);
     while(1) {
         for(u8 j=0;j<6;j++) {
-            for(u8 k=0;k<128;k++) buf[k]=(k & 15)+((j%3)<<5)+((j/3)<<4);
-            WriteVRAM(buf,j<<7,128);
-        }
-        run4();
-        for(u8 j=0;j<6;j++) {
             for(u8 k=0;k<128;k++) buf[k]=(k & 31)+(((j+5)%6)<<5);
             WriteVRAM(buf,j<<7,128);
         }
@@ -511,6 +549,16 @@ int main() {
             WriteVRAM(buf,j<<7,128);
         }
         run3();
+        for(u8 j=0;j<6;j++) {
+            for(u8 k=0;k<128;k++) buf[k]=(k & 15)+((j%3)<<5)+((j/3)<<4);
+            WriteVRAM(buf,j<<7,128);
+        }
+        run4();
+        for(u8 j=0;j<6;j++) {
+            for(u8 k=0;k<128;k++) buf[k]=(k & 7)+((j%3)<<5)+((j/3)<<4);
+            WriteVRAM(buf,j<<7,128);
+        }
+        run5();
     }
     return 0;
 }
