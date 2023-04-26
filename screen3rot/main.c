@@ -7,19 +7,28 @@ int putchar(int c){
     return 1;
 }
 
-//#include <stdint.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <math.h>
-
 typedef uint8_t u8;
 typedef int8_t s8;
 typedef uint16_t u16;
 typedef int16_t s16;
 typedef int32_t s32;
 typedef uint32_t u32;
+#if 1
+u8 	g_VBlank = 0;
+void VBlankHook() {
+	g_VBlank = 1;
+}
 
-const char dt[]={
+void WaitVBlank() {
+	while(g_VBlank == 0) {}
+	g_VBlank = 0;
+}
+#else
+#define VBlankHook()
+#define WaitVBlank()
+#define Bios_SetHookCallback(a,b)
+#endif
+const u8 dt[]={
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -85,14 +94,16 @@ const char dt[]={
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 };
+u8 dt2[128*64];
 const s8 sins[32]={0,3,6,8,11,13,14,15,15,15,14,13,11,8,6,3,0,-3,-6,-8,-11,-13,-14,-15,-15,-15,-14,-13,-11,-8,-6,-3,};
 const s8 coss[32]={16,15,14,13,11,8,6,3,0,-3,-6,-8,-11,-13,-14,-15,-15,-15,-14,-13,-11,-8,-6,-3,0,3,6,8,11,13,14,15,};
 // 何をするプログラムなのかと言うと画像データを回転して出力するだけ。
-char buf[32*8];
 #define SIN(N) sins[N]
 #define COS(N) coss[N]
-s16 dy,dx;
-u8* p;
+extern s16 dx,dy,dx2,dy2;
+
+extern u8* p;
+/*
 void f1(s16 y1,s16 x1) {
     s8 v,y2,x2;
     u8 i=32;
@@ -119,6 +130,7 @@ void f1(s16 y1,s16 x1) {
         p+=8;x1+=dx;y1+=dy;		
     }while(1);
 }
+*/
 #define LD_IXH_A .db #0xdd,#0x67
 #define LD_IXH_B .db #0xdd,#0x60
 #define LD_IXH_C .db #0xdd,#0x61
@@ -179,7 +191,8 @@ void f1(s16 y1,s16 x1) {
   #define LDAX1L LD_A_IXL
   #define LDX1LA LD_IXL_A
   #define LDX1LE LD_IXL_E
-
+  #define LDZEROA LD_IXH_A
+  #define LDD0 LD_D_IXH
 #else
   #define LDALOOPCNT LD_A_IYL
   #define LDLOOPCNTA LD_IYL_A
@@ -187,14 +200,12 @@ void f1(s16 y1,s16 x1) {
 #ifdef USEIY
   #define LDAV   LD_A_IYH
   #define LDVA   LD_IYH_A
+  #define LDDV   LD_D_IYH
   #define LDALOOPCNT LD_A_IYL
   #define LDLOOPCNTA LD_IYL_A
 #else
 #endif
-
-u8 x1l;
-
-
+extern u8 loopcnt;
 void f3(s16 y1,s16 x1) {
     #define X1H d
     #define X1L e
@@ -204,77 +215,80 @@ void f3(s16 y1,s16 x1) {
     push	ix
     ld	Y1L, l
     ld	Y1H, h
-;tes:98: do{
+    ; LOOPCNT = 32
+LOOPCNT$:
+    _loopcnt = LOOPCNT$+1
     ld a,#0x20
     LDLOOPCNTA
-00115$:
-;tes:99: v = 0;
-    ld a,#0
+    xor a, a
+    LDZEROA
+LOOP$:
+    ; v = 0;
+    xor a, a
     LDVA
-;tes:101: y2=y1>>8;
+    ; a=y1>>8;
     ld	a, Y1H
-;tes:102: if(y2&~63)
+    ; if(a&~63) {
     and	a, #0xc0
-    jr	NZ, 00106$
-;tes:105: x2=x1>>8;
+    jr	NZ, IF1END$
+    ; a=x1>>8;
     ld	a, X1H
-;tes:106: if(x2 & 128)
-    bit	7, a
-    jr	NZ, 00106$
-;tes:109: v=dt[x2+(y2<<7)];
-    ld	l, #0    ;2/7
+    ; if(a & 128) {
+    bit	7, a     ; 2/8
+    jr	NZ, IF1END$
+    LD_IXL_E     ;
+    ld e,X1H     ; de = x1>>8
+    LDD0         ; 1/4
+
+    ; v=dt[(x1>>8)+((y1>>8)<<7)];
+    ld	l, d     ;1/4 ; hl = ((y1>>8)<<7)
     ld	h, Y1H   ;1/4
     rr	h        ;1/4
     rr  l        ;1/4
+    add	hl, de   ; hl = de + hl (hl = (x1>>8)+((y1>>8)<<7))
+    ld	de, #_dt2; de = dt
+    add	hl, de   ; hl = hl + de (hl = &dt[(x1>>8)+((y1>>8)<<7)])
+    LD_E_IXL       ; pop X1
+    ld X1H,a       ;
 
-    ld a,X1H
-    LD_IXL_E
-    ld e,X1H
-    ld	d, #0
-    add	hl, de
-    ld	de, #_dt
-    add	hl, de
-    LD_E_IXL
-    ld X1H,a
-    ld	a, (hl)
-;tes:110: v = v<<4;
-    add	a, a ; 1/4
-    add	a, a ; 1/4
-    add	a, a ; 1/4
-    add	a, a ; 1/4
-    LDVA
-00106$:
-;tes:114: x1+=dx;
-    ld hl,(#_dx) ;5/16
+    ld	a, (hl)  ; a = *hl  (v = dt[(x1>>8)+((y1>>8)<<7)])
+    ; a = a<<4;
+    LDVA         ; v = v << 4
+IF1END$: ; }} -----------------------
+    ; x1+=dx;
+    _dx=IF1END$ + 1
+    ld hl,#0     ;5/16
     add	hl,de    ;3/11
-    ld d,h       ;1/4
-    ld e,l       ;1/4
-;tes:115: y1+=dy;
-    ld hl,(#_dy) ;5/16
+    ex de,hl     ;1/4
+DYY$:
+    _dy=DYY$+1
+    ; y1+=dy;
+    ld hl,#0     ;5/16
     add	hl,bc    ;3/11
-    ld Y1H,h       ;1/4
-    ld Y1L,l       ;1/4
+    ld Y1H,h     ;1/4
+    ld Y1L,l     ;1/4
                  ;10/35
+    ; -----------------------
+    ; y2=y1>>8;
     ld a,Y1H
-;tes:117: y2=y1>>8;
-;tes:118: if(y2&~63)
+    ; if(y2&~63)
     and	a, #0xc0
-    jr	NZ, 00112$
-;tes:122: x2=x1>>8;
+    jr	NZ, IFEND2$
+    ; x2=x1>>8;
     ld	a, X1H
-;tes:123: if(x2 & 128)
+    ; if(x2 & 128)
     bit	7, a
-    jr	NZ, 00112$
-;tes:126: v|=dt[x2+(y2<<7)];
-    ld	l, #0    ;2/7
+    jr	NZ, IFEND2$
+    LD_IXL_E     ;
+    ld e,X1H     ; de = x1>>8
+    LDD0         ; 1/4
+
+    ; v|=dt[x2+(y2<<7)];
+    ld	l, d     ;1/4
     ld	h, Y1H   ;1/4
     rr	h        ;1/4
     rr  l        ;1/4
 
-    ld a,X1H
-    LD_IXL_E
-    ld e,X1H
-    ld	d, #0
     add	hl, de
     ld	de, #_dt
     add	hl, de
@@ -284,189 +298,191 @@ void f3(s16 y1,s16 x1) {
     ld	l, (hl)
     or	a, l
     LDVA
-00112$:
-;tes:130: *p=v;
-    ld	hl, (_p);5/16
+IFEND2$: ; -----------------------
+    ; *p=v;
     LDAV		;1/4
-    ld	(hl), a ;2/7
-;tes:131: i--;
+PPP$:
+    _p = PPP$+1
+    ld	(#0), a ;2/7
+    ; LOOPCNT--
     LDALOOPCNT	;1/4
     dec a		;1/4
+    ; if(LOOPCNT==0) return;
+    jr	Z, LOOPEND$
     LDLOOPCNTA	;1/4
-;tes:132: if(i==0)
-    or	a, a
-    jr	Z, 00118$
-;tes:136: p+=8;
+    ; p+=8;
     ld	hl, #_p ;3/10
-    ld	a, (hl)
-    add	a, #0x08
-    ld	(hl), a
-    jr	NC, 00160$
-    inc	hl
-    inc	(hl)
-00160$:
-;tes:137: x1+=dx;
-    ld hl,(#_dx) ;5/16
+    ld	a, (hl) ;2/7
+    add	a, #0x08;2/7
+    ld	(hl), a ;2/7
+    ;jr	NC, PADDEND$
+    ;inc	hl
+    ;inc	(hl)
+PADDEND$:
+    ; x1+=dx;
+    _dx2 = PADDEND$+1
+    ld hl,#0     ;3/10
     add	hl,de    ;3/11
-    ld d,h       ;1/4
-    ld e,l       ;1/4
-;tes:138: y1+=dy;
-    ld hl,(#_dy) ;5/16
+    ex de,hl     ;1/4
+    ; y1+=dy;
+DYY2$:
+    _dy2 = DYY2$+1
+    ld hl,#0     ;5/16
     add	hl,bc    ;3/11
     ld b,h       ;1/4
     ld c,l       ;1/4
                  ;10/35
-;tes:140: while(1);
-    jp	00115$
-00118$:
-;tes:141: }
+    jp	LOOP$
+LOOPEND$:
     pop	ix
     ret
     __endasm;
 }
+char buf1[32*48+256];
+u8* buf;
+#define DI() __asm di __endasm
+#define EI() __asm ei __endasm
+#define WriteVRAM(a,b,c) DI();VDP_WriteVRAM_16K(a,b,c);EI()
 void run(){
     u8 sita;
     s16 nx,ny;
-    VDP_RegWriteBakMask(10,~128,0);
     for(u8 s=1;s<=32;s++){
         sita = (-s) & 31;
         // sitaだけ回転する
         nx =  128/2*256 - ((COS(sita)<<5) + SIN(sita)*8*3/2)*s*2;
         ny =  64/2*256 - ((-SIN(sita)<<5) + COS(sita)*8*3/2)*s*2;
         // 移動分はどのくらいか
-        dx =  COS((-sita)&31)*s*2;
-        dy =  SIN((-sita)&31)*s*2;
-        /*
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm; VDP_WriteVRAM_16K(buf,0x800,32*8);__asm ei __endasm;
-        */
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*1,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*2,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*3,32*8);__asm ei __endasm;
-        /*
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*4,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*5,32*8);__asm ei __endasm;
-        */
+        dx = dx2 = COS((-sita)&31)*s*2;
+        dy = dy2 = SIN((-sita)&31)*s*2;
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
     }
-    VDP_RegWriteBakMask(10,255,128);
+
     for(u8 s=32,i=32;i<=64+32;i+=3){
         sita = (-s) & 31;
         // sitaだけ回転する
         nx =  128/2*256 - ((COS(sita)<<5) + SIN(sita)*8*3/2)*(64+32-i);
         ny =  64/2*256 - ((-SIN(sita)<<5) + COS(sita)*8*3/2)*(64+32-i);
         // 移動分はどのくらいか
-        dx =  COS((-sita)&31)*(64+32-i);
-        dy =  SIN((-sita)&31)*(64+32-i);
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*1,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*2,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*3,32*8);__asm ei __endasm;
+        dx = dx2 = COS((-sita)&31)*(64+32-i);
+        dy = dy2 = SIN((-sita)&31)*(64+32-i);
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
     }
 }
 void run3(){
+    loopcnt = 16;
     u8 sita;
     s16 nx,ny;
-    VDP_RegWriteBakMask(10,~128,0);
     for(u8 s=1;s<=64;s++){
         sita = (-s) & 31;
         // sitaだけ回転する
-        nx =  128/2*256 - ((COS(sita)<<5) + SIN(sita)*8*3/2)*s*2;
-        ny =  64/2*256 - ((-SIN(sita)<<5) + COS(sita)*8*3/2)*s*2;
+        nx =  128/2*256 - ((COS(sita)<<4) + SIN(sita)*8*3/2)*s*2;
+        ny =  64/2*256 - ((-SIN(sita)<<4) + COS(sita)*8*3/2)*s*2;
         // 移動分はどのくらいか
-        dx =  COS((-sita)&31)*s*2;
-        dy =  SIN((-sita)&31)*s*2;
-        /*
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm; VDP_WriteVRAM_16K(buf,0x800,32*8);__asm ei __endasm;
-        */
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*1,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*2,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*3,32*8);__asm ei __endasm;
-        /*
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*4,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*5,32*8);__asm ei __endasm;
-        */
+        dx = dx2 = COS((-sita)&31)*s*2;
+        dy = dy2 = SIN((-sita)&31)*s*2;
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800,32*8*3);
     }
-    VDP_RegWriteBakMask(10,255,128);
     for(u8 i=32;i<=64+64;i+=8){
         sita = (0) & 31;
         // sitaだけ回転する
-        nx =  128/2*256 - ((COS(sita)<<5) + SIN(sita)*8*3/2)*(64+64-i);
-        ny =  64/2*256 - ((-SIN(sita)<<5) + COS(sita)*8*3/2)*(64+64-i);
+        nx =  128/2*256 - ((COS(sita)<<4) + SIN(sita)*8*3/2)*(64+64-i);
+        ny =  64/2*256 - ((-SIN(sita)<<4) + COS(sita)*8*3/2)*(64+64-i);
         // 移動分はどのくらいか
-        dx =  COS((-sita)&31)*(64+64-i);
-        dy =  SIN((-sita)&31)*(64+64-i);
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*1,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*2,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*3,32*8);__asm ei __endasm;
+        dx = dx2 = COS((-sita)&31)*(64+64-i);
+        dy = dy2 = SIN((-sita)&31)*(64+64-i);
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800,32*8*3);
     }
+    loopcnt = 32;
+}
+
+void run4(){
+    loopcnt = 16;
+    u8 sita;
+    s16 nx,ny;
+    for(u8 s=1;s<=64;s++){
+        sita = (s+8) & 31;
+        // sitaだけ回転する
+        nx =  128/2*256 - ((COS(sita)<<4) + SIN(sita)*8*6/2)*s/2*3;
+        ny =  64/2*256 - ((-SIN(sita)<<4) + COS(sita)*8*6/2)*s/2*3;
+        // 移動分はどのくらいか
+        dx = dx2 = COS((-sita)&31)*s/2*3;
+        dy = dy2 = SIN((-sita)&31)*s/2*3;
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+8*16+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
+    }
+    for(s8 s=61;s>=1;s-=4){
+        sita = (8) & 31;
+        // sitaだけ回転する
+        nx =  128/2*256 - ((COS(sita)<<4) + SIN(sita)*8*6/2)*s/2*3;
+        ny =  64/2*256 - ((-SIN(sita)<<4) + COS(sita)*8*6/2)*s/2*3;
+        // 移動分はどのくらいか
+        dx = dx2 = COS((-sita)&31)*s/2*3;
+        dy = dy2 = SIN((-sita)&31)*s/2*3;
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+8*16+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+8*16+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
+    }
+    loopcnt = 32;
 }
 
 void run2(){
     u8 sita;
     s16 nx,ny;
-    VDP_RegWriteBakMask(10,~128,0);
     for(u8 s=1;s<=32;s++){
         sita = (s*2) & 31;
         // sitaだけ回転する
         nx =  128/2*256 - ((COS(sita)<<5) + SIN(sita)*8*3/2)*s*2;
         ny =  64/2*256 - ((-SIN(sita)<<5) + COS(sita)*8*3/2)*s*2;
         // 移動分はどのくらいか
-        dx =  COS((-sita)&31)*s*2;
-        dy =  SIN((-sita)&31)*s*2;
-        /*
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm; VDP_WriteVRAM_16K(buf,0x800,32*8);__asm ei __endasm;
-        */
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*1,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*2,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*3,32*8);__asm ei __endasm;
-        /*
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*4,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*5,32*8);__asm ei __endasm;
-        */
+        dx = dx2 = COS((-sita)&31)*s*2;
+        dy = dy2 = SIN((-sita)&31)*s*2;
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
     }
-    VDP_RegWriteBakMask(10,255,128);
     for(u8 s=32,i=32;i<=64+32;i+=4){
         sita = (-s) & 31;
         // sitaだけ回転する
         nx =  128/2*256 - ((COS(sita)<<5) + SIN(sita)*8*3/2)*(64+32-i);
         ny =  64/2*256 - ((-SIN(sita)<<5) + COS(sita)*8*3/2)*(64+32-i);
         // 移動分はどのくらいか
-        dx =  COS((-sita)&31)*(64+32-i);
-        dy =  SIN((-sita)&31)*(64+32-i);
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*1,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*2,32*8);__asm ei __endasm;
-        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[y];f3(ny,nx);}
-        __asm di __endasm;VDP_WriteVRAM_16K(buf,0x800+32*8*3,32*8);__asm ei __endasm;
+        dx = dx2 = COS((-sita)&31)*(64+32-i);
+        dy = dy2 = SIN((-sita)&31)*(64+32-i);
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*0+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*1+y];f3(ny,nx);}
+        for(u8 y=0;y<8;y++,nx-=dy,ny+=dx) {p=&buf[8*32*2+y];f3(ny,nx);}
+        WriteVRAM(buf,0x800+32*8*0,32*8*3);
     }
 }
-#define DI __asm di __endasm;
-#define EI __asm ei __endasm;
 
 int main() {
+    buf=buf1;
+    for(;((u16)buf)&255;buf++){}
+    for(int i=0;i<128*64;i++)dt2[i]=dt[i]<<4;
+	Bios_SetHookCallback(H_TIMI, VBlankHook);
+	WaitVBlank();
     VDP_SetColor(0);
     VDP_ClearVRAM();
     VDP_SetMode(VDP_MODE_SCREEN3);
@@ -475,19 +491,24 @@ int main() {
     VDP_SetPaletteEntry(2,RGB16(1,1,2));
     VDP_RegWriteBak(4,1); VDP_RegWriteBak(2,0);
     while(1) {
-        for(u8 j=0;j<8;j++) {
-            for(u8 k=0;k<128;k++) buf[k]=(k & 31)+(j<<5);
-            DI; VDP_WriteVRAM_16K(buf,j<<7,128); EI;
+        for(u8 j=0;j<6;j++) {
+            for(u8 k=0;k<128;k++) buf[k]=(k & 15)+((j%3)<<5)+((j/3)<<4);
+            WriteVRAM(buf,j<<7,128);
+        }
+        run4();
+        for(u8 j=0;j<6;j++) {
+            for(u8 k=0;k<128;k++) buf[k]=(k & 31)+(((j+5)%6)<<5);
+            WriteVRAM(buf,j<<7,128);
         }
         run();
-        for(u8 j=0;j<8;j++) {
-            for(u8 k=0;k<128;k++) buf[k]=(k & 31)+((((j%3)+1)&7)<<5);
-            DI; VDP_WriteVRAM_16K(buf,j<<7,128); EI;
+        for(u8 j=0;j<6;j++) {
+            for(u8 k=0;k<128;k++) buf[k]=(k & 31)+((((j%3))&7)<<5);
+            WriteVRAM(buf,j<<7,128);
         }
         run2();
-        for(u8 j=0;j<8;j++) {
-            for(u8 k=0;k<128;k++) buf[k]=(k & 15)+8+((((j%3)+1)&7)<<5);
-            DI; VDP_WriteVRAM_16K(buf,j<<7,128); EI;
+        for(u8 j=0;j<6;j++) {
+            for(u8 k=0;k<128;k++) buf[k]=(k & 15)+((((j%3))&7)<<5);
+            WriteVRAM(buf,j<<7,128);
         }
         run3();
     }

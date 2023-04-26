@@ -91,7 +91,7 @@ Target = "DOS1";
 //   - VBLANK     V-blank handler
 //   - VHBLANK    V-blank and h-blank handler (V9938 or V9958)
 //   - V9990      v-blank, h-blank and command end handler (V9990)
-CustomISR = "VBLANK";
+CustomISR = "";
 
 //-- Use automatic banked call and trampoline functions (boolean). For mapped ROM
 // BankedCall = false;
@@ -100,7 +100,7 @@ CustomISR = "VBLANK";
 // ForceRamAddr = 0;
 
 //-- List of data files to copy to disk (array)
-DiskFiles = ["dsk/pal.sr3","dsk/dt.pl3","dsk/dat.sr3"];
+DiskFiles = [];
 
 //-- BASIC USR driver default address (number)
 // USRAddr = 0xC000;

@@ -1,3 +1,5 @@
+all:
+	./build.sh
 rec:
 	openmsx -machine Panasonic_FS-A1GT -ext gfx9000 -ext Moonsound -diska emul/dsk/DOS1_template.dsk -command "set speed 9999;after time 13.5 \"set speed 100;record start aaa\""
 mp4:
