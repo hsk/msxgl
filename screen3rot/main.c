@@ -1,11 +1,145 @@
 #include "msxgl.h"
 #include "stdint.h"
-#include "dos.h"
-#include "stdio.h"
-int putchar(int c){
-    DOS_CharOutput(c);
-    return 1;
+//#include "dos.h"
+//#include "stdio.h"
+
+
+#if 1
+#define P_VDP_REG		0x99			///< Register setup port (write) (bit 7=1 in second write)
+__sfr __at(0x99)	g_VDP_RegPort;	///< Register setup port (write) (bit 7=1 in second write)
+
+#define F_VDP_REG			0x80 // VDP register write port (bit 7=1 in second write)
+#define F_VDP_WRIT			0x40 // bit 6: read/write access (1=write)
+
+#define VDP_REG(_r)			(F_VDP_REG | _r)
+#define VDP_DI			
+#define VDP_EI			
+#define VDP_EI_DEF		
+
+void RegWrite(u8 reg, u8 value) __PRESERVES(b, c, d, e, iyl, iyh)
+{
+	reg;	// A
+	value;	// L
+
+	__asm
+		ld		h, a					// Register number
+		ld		a, l					// Value
+		VDP_DI //~~~~~~~~~~~~~~~~~~~~~~~~~~
+		out		(P_VDP_ADDR), a
+		ld		a, h
+		add		#0x80					// @todo Can be optimize by including 80h in the register number ; 33cc -> 25cc (warning for MSX1 VRAM write timing)
+		VDP_EI //~~~~~~~~~~~~~~~~~~~~~~~~~~
+		out		(P_VDP_ADDR), a
+	__endasm;
 }
+
+inline void SetColor(u8 color) { RegWrite(7, color); }
+
+void RegWriteBak(u8 reg, u8 value) __PRESERVES(d, e, iyl, iyh) {
+	reg;	// A
+	value;	// L
+
+	__asm
+		ld		c, a					// Register number
+		ld		a, l					// Value
+		// Backup
+		ld		b, #0
+		ld		hl, #_g_VDP_REGSAV
+		add		hl, bc
+		ld		(hl), a
+		// Write to register
+		VDP_DI //~~~~~~~~~~~~~~~~~~~~~~~~~~
+		out		(P_VDP_ADDR), a
+		ld		a, c
+		add		#0x80					// @todo Can be optimize by including 80h in the register number ; 33cc -> 25cc (warning for MSX1 VRAM write timing)
+		VDP_EI //~~~~~~~~~~~~~~~~~~~~~~~~~~
+		out		(P_VDP_ADDR), a
+	__endasm;
+}
+
+void SetModeFlag(u8 flag) {
+	u8 reg1 = g_VDP_REGSAV[1];
+	reg1 &= 0b11100111;
+	if(flag & 0b00001)
+		reg1 |= 0b00010000;
+	if(flag & 0b00010)
+		reg1 |= 0b00001000;
+	RegWriteBak(1, reg1);
+
+	// VDP register #0
+	u8 reg0 = g_VDP_REGSAV[0];
+	reg0 &= 0b11110001;
+	flag >>= 1;
+	flag &= 0b00001110;
+	reg0 |= flag;
+	RegWriteBak(0, reg0);
+}
+void SetPaletteEntry(u8 index, u16 color)
+{
+	g_VDP_RegPort = index;
+	g_VDP_RegPort = VDP_REG(16);
+	g_VDP_PalPort = color & 0x00FF;
+	g_VDP_PalPort = color >> 8;
+}
+//-----------------------------------------------------------------------------
+// Write data from RAM to VRAM [MSX1/2/2+/TR]
+//
+// Parameters:
+//   src   - Source data address in RAM
+//   dest  - Destiation address in VRAM (14bits address for 16KB VRAM)
+//   count - Nomber of byte to copy in VRAM
+void WriteVRAM_16K(const u8* src, u16 dest, u16 count) __sdcccall(0)
+{
+	src;   // IY+0
+	dest;  // IY+2
+	count; // IY+4
+
+	__asm
+
+		// Reset VRAM address bit 14 to 16 (in R#14)
+		xor		a
+		out		(P_VDP_REG), a
+		ld		a, #VDP_REG(14)
+		out		(P_VDP_REG), a
+
+		ld		iy, #2
+		add		iy, sp
+		// Setup address register 
+		ld		a, 2(iy)
+		VDP_DI //~~~~~~~~~~~~~~~~~~~~~~~~~~
+		out		(P_VDP_ADDR), a			// RegPort = (dest & 0xFF)
+		ld		a, 3(iy)
+		and		a, #0x3F
+		add		a, #F_VDP_WRIT
+		VDP_EI //~~~~~~~~~~~~~~~~~~~~~~~~~~
+		out		(P_VDP_ADDR), a			// RegPort = ((dest >> 8) & 0x3F) + F_VDP_WRIT
+
+		// while(count--) DataPort = *src++;
+		ld		l, 0(iy)				// source address
+		ld		h, 1(iy)
+		ld		c, #P_VDP_DATA			// data register
+		// Handle count LSB
+		ld		a, 4(iy)				// count LSB
+		cp		a, #0
+		jp		z, wrt16_loop_init		// skip LSB
+		ld		b, a					// send (count & 0x00FF) bytes
+		otir
+		// Handle count MSB
+	wrt16_loop_init:
+		ld		a, 5(iy)				// count MSB
+	wrt16_loop_start:
+		cp		a, #0
+		jp		z, wrt16_loop_end			// finished
+		ld		b, #0					// send 256 bytes packages
+		otir
+		dec		a
+		jp		wrt16_loop_start
+
+	wrt16_loop_end:
+        ret
+	__endasm;
+}
+#endif
 
 typedef uint8_t u8;
 typedef int8_t s8;
@@ -343,7 +477,7 @@ char buf1[32*48+256];
 u8* buf;
 #define DI() __asm di __endasm
 #define EI() __asm ei __endasm
-#define WriteVRAM(a,b,c) DI();VDP_WriteVRAM_16K(a,b,c);EI()
+#define WriteVRAM(a,b,c) DI();WriteVRAM_16K(a,b,c);EI()
 void run(){
     u8 sita;
     s16 nx,ny;
@@ -525,15 +659,13 @@ int main() {
     buf=buf1;
     for(;((u16)buf)&255;buf++){}
     for(int i=0;i<128*64;i++)dt2[i]=dt[i]<<4;
-	//Bios_SetHookCallback(H_TIMI, VBlankHook);
-	//WaitVBlank();
-    VDP_SetColor(0);
-    VDP_ClearVRAM();
-    VDP_SetMode(VDP_MODE_SCREEN3);
-    VDP_SetPaletteEntry(0,RGB16(0,2,6));
-    VDP_SetPaletteEntry(1,RGB16(5,5,7));
-    VDP_SetPaletteEntry(2,RGB16(1,1,2));
-    VDP_RegWriteBak(4,1); VDP_RegWriteBak(2,0);
+    SetColor(0);
+    //VDP_SetMode(VDP_MODE_SCREEN3);
+    SetModeFlag(VDP_MC_MODE);
+    SetPaletteEntry(0,RGB16(0,2,6));
+    SetPaletteEntry(1,RGB16(5,5,7));
+    SetPaletteEntry(2,RGB16(1,1,2));
+    RegWriteBak(4,1); RegWriteBak(2,0);
     while(1) {
         for(u8 j=0;j<6;j++) {
             for(u8 k=0;k<128;k++) buf[k]=(k & 31)+(((j+5)%6)<<5);
